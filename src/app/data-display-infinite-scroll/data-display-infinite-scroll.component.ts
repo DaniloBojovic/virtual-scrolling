@@ -24,6 +24,7 @@ export class DataDisplayInfiniteScrollComponent {
   items: Item[] = [];
   page = 1;
   loading = false;
+  debounceTimer: any;
 
   constructor(private dataService: DataService) {}
 
@@ -33,13 +34,19 @@ export class DataDisplayInfiniteScrollComponent {
 
   @HostListener('window:scroll', ['$event'])
   onScroll(): void {
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const threshold = document.body.offsetHeight - 500;
-
-    if (scrollPosition >= threshold && !this.loading) {
-      this.page++;
-      this.loadData();
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
     }
+
+    this.debounceTimer = setTimeout(() => {
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const threshold = document.body.offsetHeight - 500;
+
+      if (scrollPosition >= threshold && !this.loading) {
+        this.page++;
+        this.loadData();
+      }
+    }, 100);
   }
 
   loadData() {
